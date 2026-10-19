@@ -74,7 +74,7 @@ public final class CategoryDTO {
                 );
             }
 
-            if (description != null && isValidDescription(description)) {
+            if (description != null && !isValidDescription(description)) {
                 throw new IllegalArgumentException(
                         "Descrição deve ter no máximo 255 caracteres."
                 );
