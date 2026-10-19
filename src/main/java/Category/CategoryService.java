@@ -25,48 +25,56 @@ public class CategoryService {
         return convert(repository.create(category));
     }
 
-    public CategoryDTO buscarPorId(Integer id) {
-        validarId(id);
+    public CategoryDTO.Response findById(Integer id) {
 
-        Category category = repository.buscarPorId(id)
+        Category category = repository.findById(id)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Categoria não encontrada."
                         )
                 );
 
-        return converter(category);
+        return convert(category);
     }
 
-    public List<CategoryDTO> listarTodos() {
-        return repository.listarTodos()
+    public List<CategoryDTO.Response> findAll() {
+        return repository.findAll()
                 .stream()
-                .map(this::converter)
+                .map(this::convert)
                 .toList();
     }
 
-    public CategoryDTO atualizar(Integer id, CategoryDTO dto) {
-        validarId(id);
-        validar(dto);
+    public CategoryDTO.Response update(CategoryDTO.Update dto) {
 
-        Category existente = repository.buscarPorId(id)
+        Category exist = repository.findById(dto.id())
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Categoria não encontrada."
                         )
                 );
 
-        existente.setName(dto.name().trim());
-        existente.setDescription(dto.description()
-        );
-        existente.setActive(dto.active());
+        if (dto.name() != null) {
+            exist.setName(dto.name());
+        }
 
-        return converter(repository.atualizar(existente));
+        if (dto.description() != null) {
+            exist.setDescription(dto.description());
+        }
+
+        if (dto.active() != null) {
+            exist.setActive(dto.active());
+        }
+
+        if (dto.id() != null){
+            exist.setId(dto.id());
+        }
+
+        Category updated = repository.update(exist);
+        return convert(updated);
     }
 
-    public boolean excluir(Integer id) {
-
-        return repository.excluirLogicamente(id);
+    public CategoryDTO.Response delete(CategoryDTO.Delete dto) {
+        return convert(repository.logicalDelete(dto.id()));
     }
 
     private CategoryDTO.Response convert(Category category) {
