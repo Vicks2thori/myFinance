@@ -10,8 +10,8 @@ public class CategoryRepository {
 
     public Category create(Category category) {
         String sql = """
-                INSERT INTO category (name, description)
-                VALUES (?, ?)
+                INSERT INTO category (name, description, is_active)
+                VALUES (?, ?, ?)
                 RETURNING id, name, description, is_active,
                           created_at, updated_at, deleted_at
                 """;
@@ -21,10 +21,11 @@ public class CategoryRepository {
 
             stmt.setString(1, category.getName());
             stmt.setString(2, category.getDescription());
+            stmt.setBoolean(3, category.isActive());
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return mapear(rs);
+                    return map(rs);
                 }
             }
 
@@ -35,7 +36,7 @@ public class CategoryRepository {
         }
     }
 
-    public Optional<Category> buscarPorId(Integer id) {
+    public Optional<Category> findById(Integer id) {
         String sql = """
                 SELECT id, name, description, is_active,
                        created_at, updated_at, deleted_at
@@ -50,7 +51,7 @@ public class CategoryRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapear(rs));
+                    return Optional.of(map(rs));
                 }
                 return Optional.empty();
             }
@@ -60,7 +61,7 @@ public class CategoryRepository {
         }
     }
 
-    public List<Category> listarTodos() {
+    public List<Category> findAll() {
         String sql = """
                 SELECT id, name, description, is_active,
                        created_at, updated_at, deleted_at
@@ -69,24 +70,24 @@ public class CategoryRepository {
                 ORDER BY name
                 """;
 
-        List<Category> categorias = new ArrayList<>();
+        List<Category> categories = new ArrayList<>();
 
         try (Connection conn = ConexaoBanco.USER();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                categorias.add(mapear(rs));
+                categories.add(map(rs));
             }
 
-            return categorias;
+            return categories;
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao listar categorias.", e);
         }
     }
 
-    public Category atualizar(Category category) {
+    public Category update(Category category) {
         String sql = """
                 UPDATE category
                 SET name = ?,
@@ -108,7 +109,7 @@ public class CategoryRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return mapear(rs);
+                    return map(rs);
                 }
                 throw new IllegalArgumentException(
                         "Categoria não encontrada ou já excluída."
@@ -120,7 +121,7 @@ public class CategoryRepository {
         }
     }
 
-    public boolean excluirLogicamente(Integer id) {
+    public Category logicalDelete(Integer id) {
         String sql = """
                 UPDATE category
                 SET is_active = FALSE,
@@ -133,14 +134,21 @@ public class CategoryRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
 
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return map(rs);
+                }
+                throw new IllegalArgumentException(
+                        "Categoria não encontrada ou já excluída."
+                );
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao excluir categoria.", e);
         }
     }
 
-    private Category mapear(ResultSet rs) throws SQLException {
+    private Category map(ResultSet rs) throws SQLException {
         return new Category(
                 rs.getInt("id"),
                 rs.getString("name"),

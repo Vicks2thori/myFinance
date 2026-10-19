@@ -10,23 +10,23 @@ public class CategoryController {
         this.service = service;
     }
 
-    public CategoryDTO cadastrar(CategoryDTO dto) {
-        return service.cadastrar(dto);
+    public CategoryDTO.Response create(CategoryDTO.Create dto) {
+        return service.create(dto);
     }
 
-    public CategoryDTO buscarPorId(Integer id) {
-        return service.buscarPorId(id);
+    public CategoryDTO.Response findByID(Integer id) {
+        return service.findById(id);
     }
 
-    public List<CategoryDTO> listarTodos() {
-        return service.listarTodos();
+    public List<CategoryDTO.Response> findAll() {
+        return service.findAll();
     }
 
-    public CategoryDTO atualizar(Integer id, CategoryDTO dto) {
-        return service.atualizar(id, dto);
+    public CategoryDTO.Response update(CategoryDTO.Update dto) {
+        return service.update(dto);
     }
 
-    public boolean excluir(Integer id) {
-        return service.excluir(id);
+    public CategoryDTO.Response delete(CategoryDTO.Delete dto) {
+        return service.delete(dto);
     }
 }
