@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class CategoryRepository {
 
-    public Category salvar(Category category) {
+    public Category create(Category category) {
         String sql = """
                 INSERT INTO category (name, description)
                 VALUES (?, ?)

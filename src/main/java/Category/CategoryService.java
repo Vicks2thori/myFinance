@@ -10,20 +10,19 @@ public class CategoryService {
         this.repository = repository;
     }
 
-    public CategoryDTO cadastrar(CategoryDTO dto) {
-        validar(dto);
+    public CategoryDTO.Response create(CategoryDTO.Create dto) {
 
         Category category = new Category(
                 null,
-                dto.name().trim(),
-                normalizarDescricao(dto.description()),
-                true,
+                dto.name(),
+                dto.description(),
+                dto.active(),
                 null,
                 null,
                 null
         );
 
-        return converter(repository.salvar(category));
+        return convert(repository.create(category));
     }
 
     public CategoryDTO buscarPorId(Integer id) {
@@ -58,8 +57,7 @@ public class CategoryService {
                 );
 
         existente.setName(dto.name().trim());
-        existente.setDescription(
-                normalizarDescricao(dto.description())
+        existente.setDescription(dto.description()
         );
         existente.setActive(dto.active());
 
@@ -67,55 +65,12 @@ public class CategoryService {
     }
 
     public boolean excluir(Integer id) {
-        validarId(id);
 
         return repository.excluirLogicamente(id);
     }
 
-    private void validar(CategoryDTO dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException(
-                    "Os dados são obrigatórios."
-            );
-        }
-
-        if (dto.name() == null || dto.name().isBlank()) {
-            throw new IllegalArgumentException(
-                    "O nome é obrigatório."
-            );
-        }
-
-        if (dto.name().trim().length() > 100) {
-            throw new IllegalArgumentException(
-                    "O nome deve ter no máximo 100 caracteres."
-            );
-        }
-
-        if (dto.description() != null
-                && dto.description().length() > 255) {
-            throw new IllegalArgumentException(
-                    "A descrição deve ter no máximo 255 caracteres."
-            );
-        }
-    }
-
-    private String normalizarDescricao(String descricao) {
-        if (descricao == null || descricao.isBlank()) {
-            return null;
-        }
-        return descricao.trim();
-    }
-
-    private void validarId(Integer id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                    "O ID deve ser um número positivo."
-            );
-        }
-    }
-
-    private CategoryDTO converter(Category category) {
-        return new CategoryDTO(
+    private CategoryDTO.Response convert(Category category) {
+        return new CategoryDTO.Response(
                 category.getId(),
                 category.getName(),
                 category.getDescription(),
