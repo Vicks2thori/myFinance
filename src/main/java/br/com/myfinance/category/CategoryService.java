@@ -1,4 +1,4 @@
-package Category;
+package br.com.myfinance.category;
 
 import java.util.List;
 

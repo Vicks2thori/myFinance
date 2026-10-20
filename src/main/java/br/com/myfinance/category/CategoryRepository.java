@@ -1,4 +1,4 @@
-package Category;
+package br.com.myfinance.category;
 
 import config.ConexaoBanco;
 import java.sql.*;
