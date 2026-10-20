@@ -1,10 +1,10 @@
-package config;
+package br.com.myfinance.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class ConexaoBanco {
+public class DatabaseConnection {
 
     private static final String URL =
             System.getenv("DB_URL");
