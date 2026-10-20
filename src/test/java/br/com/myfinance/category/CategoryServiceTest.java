@@ -1,4 +1,4 @@
-package Category;
+package br.com.myfinance.category;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
