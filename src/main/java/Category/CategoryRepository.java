@@ -128,6 +128,8 @@ public class CategoryRepository {
                     deleted_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ? AND deleted_at IS NULL
+                RETURNING id, name, description, is_active,
+                          created_at, updated_at, deleted_at
                 """;
 
         try (Connection conn = ConexaoBanco.USER();
