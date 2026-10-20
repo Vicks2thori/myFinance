@@ -15,12 +15,12 @@ import static org.mockito.Mockito.*;
 
 class CategoryServiceTest {
 
-    private CategoryRepository repositoryMock;
+    private CategoryRepositoryJdbc repositoryMock;
     private CategoryService service;
 
     @BeforeEach
     void setUp() {
-        repositoryMock = Mockito.mock(CategoryRepository.class);
+        repositoryMock = Mockito.mock(CategoryRepositoryJdbc.class);
         service = new CategoryService(repositoryMock);
     }
 

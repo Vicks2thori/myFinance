@@ -4,9 +4,9 @@ import java.util.List;
 
 public class CategoryService {
 
-    private final CategoryRepository repository;
+    private final CategoryRepositoryJdbc repository;
 
-    public CategoryService(CategoryRepository repository) {
+    public CategoryService(CategoryRepositoryJdbc repository) {
         this.repository = repository;
     }
 
@@ -74,7 +74,7 @@ public class CategoryService {
     }
 
     public CategoryDTO.Response delete(CategoryDTO.Delete dto) {
-        return convert(repository.logicalDelete(dto.id()));
+        return convert(repository.softDelete(dto.id()));
     }
 
     private CategoryDTO.Response convert(Category category) {
