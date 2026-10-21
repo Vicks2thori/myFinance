@@ -14,10 +14,9 @@ public class CategoryService {
 
     public CategoryDTO.Response create(CategoryDTO.Create dto) {
 
-        repository.findByName(dto.name())
-                .ifPresent(existingCategory -> {
-            throw new DuplicateResourceException("Já existe uma categoria cadastrada com o nome:" + dto.name());
-        });
+        if (repository.findByName(dto.name())) {
+            throw new DuplicateResourceException("Já existe uma categoria cadastrada com o nome: " + dto.name());
+        }
 
         Category category = new Category(
                 null,
@@ -57,10 +56,9 @@ public class CategoryService {
                 );
 
         if (dto.name() != null) {
-            repository.findByName(dto.name())
-                    .ifPresent(existingCategory -> {
-                        throw new DuplicateResourceException("Já existe uma categoria cadastrada com o nome:" + dto.name());
-                    });
+            if (repository.findByName(dto.name(), dto.id())) {
+                throw new DuplicateResourceException("Já existe uma categoria cadastrada com o nome: " + dto.name());
+            }
 
             exist.setName(dto.name());
         }
