@@ -10,18 +10,18 @@ public final class CategoryDTO {
     }
 
     public record Create(
-            @NotBlank(message = "O nome é obrigatório.")
-            @Size(min = 1, max = 100, message = "O nome deve ter de 1 a 100 caracteres")
+            @NotNull(message = "O nome é obrigatório.")
+            @Size(min = 1, max = 100, message = "O nome deve ter de 1 a 100 caracteres.")
             String name,
 
             @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
             String description,
 
             @NotNull(message = "O status é obrigatório.")
-            boolean active
+            Boolean active
     ) {
         public Create {
-            name = name.trim();
+            name = (name != null && !name.isBlank()) ? name.trim() : null;
             description = (description != null && !description.isBlank()) ? description.trim() : null;
         }
     }
@@ -41,7 +41,7 @@ public final class CategoryDTO {
             @Positive(message = "O id deve ser maior que 0.")
             Integer id,
 
-            @Size(max = 100, message = "O nome deve ter de 1 a 100 caracteres")
+            @Size(max = 100, message = "O nome deve ter de 1 a 100 caracteres.")
             String name,
 
             @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
