@@ -1,47 +1,28 @@
 package br.com.myfinance.category;
 
 import java.time.OffsetDateTime;
+import jakarta.validation.constraints.*;
+import jdk.jfr.BooleanFlag;
 
 public final class CategoryDTO {
 
     private CategoryDTO() {
     }
 
-    //Validações dos atributos (conforme o banco de dados
-    private static boolean isValidId(Integer id){
-        return id != null && id > 0;
-    }
-
-    private static boolean isValidName(String name){
-        return name != null && !name.isBlank()
-               && name.length() <= 100;
-    }
-
-    private static boolean isValidDescription(String description){
-        return description == null
-                || description.trim().length() <= 255;
-    }
-
     public record Create(
+            @NotBlank(message = "O nome é obrigatório.")
+            @Size(min = 1, max = 100, message = "O nome deve ter de 1 a 100 caracteres")
             String name,
+
+            @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
             String description,
+
+            @NotNull(message = "O status é obrigatório.")
             boolean active
     ) {
         public Create {
-            if (!isValidName(name)) {
-                throw new IllegalArgumentException(
-                        "O nome é obrigatório, não pode estar em branco e deve ter no máximo 100 caracteres."
-                );
-            }
-
-            if (!isValidDescription(description)) {
-                throw new IllegalArgumentException(
-                        "Descrição deve ter no máximo 255 caracteres."
-                );
-            }
-
             name = name.trim();
-            description = (description != null) ? description.trim() : null;
+            description = (description != null && !description.isBlank()) ? description : null;
         }
     }
 
@@ -56,44 +37,27 @@ public final class CategoryDTO {
     ) {}
 
     public record Update(
+            @NotNull(message = "O id é obrigatório.")
+            @Positive(message = "O id deve ser maior que 0.")
             Integer id,
+
+            @Size(max = 100, message = "O nome deve ter de 1 a 100 caracteres")
             String name,
+
+            @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
             String description,
+
             Boolean active
     ) {
         public Update {
-            if (!isValidId(id)) {
-                throw new IllegalArgumentException(
-                        "O ID é obrigatório e deve ser maior que zero."
-                );
-            }
-
-            if (name != null && !isValidName(name)) {
-                throw new IllegalArgumentException(
-                        "O nome não pode estar em branco e deve ter no máximo 100 caracteres."
-                );
-            }
-
-            if (description != null && !isValidDescription(description)) {
-                throw new IllegalArgumentException(
-                        "Descrição deve ter no máximo 255 caracteres."
-                );
-            }
-
-            name = (name != null) ? name.trim() : null;
-            description = (description != null) ? description.trim() : null;
+            name = (name != null && !name.isBlank()) ? name.trim() : null;
+            description = (description != null && !description.isBlank()) ? description : null;
         }
     }
 
     public record Delete(
+            @NotNull(message = "O id é obrigatório.")
+            @Positive(message = "O id deve ser maior que 0.")
             Integer id
-    ) {
-        public Delete {
-            if (!isValidId(id)) {
-                throw new IllegalArgumentException(
-                        "O ID é obrigatório e deve ser maior que zero."
-                );
-            }
-        }
-    }
+    ) {}
 }
