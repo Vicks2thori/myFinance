@@ -5,9 +5,9 @@ import java.util.List;
 
 public class CategoryService {
 
-    private final CategoryRepositoryJdbc repository;
+    private final CategoryRepository repository;
 
-    public CategoryService(CategoryRepositoryJdbc repository) {
+    public CategoryService(CategoryRepository repository) {
         this.repository = repository;
     }
 
