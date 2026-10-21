@@ -1,5 +1,6 @@
 package br.com.myfinance.category;
 
+import br.com.myfinance.exeption.ResourceNotFoundException;
 import java.util.List;
 
 public class CategoryService {
@@ -29,9 +30,7 @@ public class CategoryService {
 
         Category category = repository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Categoria não encontrada."
-                        )
+                        new ResourceNotFoundException("Categoria não encontrada com o id:" + id)
                 );
 
         return convert(category);
@@ -48,9 +47,7 @@ public class CategoryService {
 
         Category exist = repository.findById(dto.id())
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Categoria não encontrada."
-                        )
+                        new ResourceNotFoundException("Categoria não encontrada com o id:" + dto.id())
                 );
 
         if (dto.name() != null) {
