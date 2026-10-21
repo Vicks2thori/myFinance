@@ -61,6 +61,31 @@ public class CategoryRepositoryJdbc implements CategoryRepository {
         }
     }
 
+    public Optional<Category> findByName(String name) {
+    String sql = """
+            SELECT id, name, description, is_active,
+                   created_at, updated_at, deleted_at 
+            FROM category
+            WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL
+            """;
+
+    try (Connection conn = DatabaseConnection.USER();
+    PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setString(1, name.trim());
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return Optional.of(map(rs));
+            }
+            return Optional.empty();
+        }
+
+    } catch (SQLException e) {
+        throw new RuntimeException("Erro ao buscar categoria por nome.", e);
+    }
+}
+
     public List<Category> findAll() {
         String sql = """
                 SELECT id, name, description, is_active,
