@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 class CategoryServiceTest {
 
-    private CategoryRepositoryJdbc repositoryMock;
+    private CategoryRepository repositoryMock;
     private CategoryService service;
 
     @BeforeEach
