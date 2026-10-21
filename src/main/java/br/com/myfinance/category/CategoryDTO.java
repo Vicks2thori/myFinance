@@ -22,7 +22,7 @@ public final class CategoryDTO {
     ) {
         public Create {
             name = name.trim();
-            description = (description != null && !description.isBlank()) ? description : null;
+            description = (description != null && !description.isBlank()) ? description.trim() : null;
         }
     }
 
@@ -51,7 +51,7 @@ public final class CategoryDTO {
     ) {
         public Update {
             name = (name != null && !name.isBlank()) ? name.trim() : null;
-            description = (description != null && !description.isBlank()) ? description : null;
+            description = (description != null && !description.isBlank()) ? description.trim() : null;
         }
     }
 
