@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,13 +17,13 @@ import static org.mockito.Mockito.*;
 
 class CategoryServiceTest {
 
-    private CategoryRepository repositoryMock;
+    private CategoryRepository repository;
     private CategoryService service;
 
     @BeforeEach
     void setUp() {
-        repositoryMock = Mockito.mock(CategoryRepository.class);
-        service = new CategoryService(repositoryMock);
+        repository = new CategoryRepositoryFake();
+        service = new CategoryService(repository);
     }
 
     @Nested
@@ -30,41 +31,98 @@ class CategoryServiceTest {
     class HappyPathTests {
 
         @Test
+        @DisplayName("Deve criar uma categoria com sucesso")
+        void shouldCreateCategorySuccessfully() {
+            CategoryDTO.Create fakeCategory = CategoryBuilder.newCategory().buildDtoCreate();
+
+            CategoryDTO.Response response = service.create(fakeCategory);
+
+            assertNotNull(response);
+            assertEquals(1, response.id());
+            assertEquals("Alimentação", response.name());
+            assertEquals("Despesas com mercado e restaurantes", response.description());
+            assertTrue(response.active());
+        }
+
+        @Test
         @DisplayName("Deve encontrar categoria por ID com sucesso")
         void shouldFindCategoryByIdSuccessfully() {
-
             Category fakeCategory = CategoryBuilder.newCategory().build();
-
-            when(repositoryMock.findById(1)).thenReturn(Optional.of(fakeCategory));
+            repository.create(fakeCategory);
 
             CategoryDTO.Response response = service.findById(1);
 
             assertNotNull(response);
             assertEquals(1, response.id());
             assertEquals("Alimentação", response.name());
-            verify(repositoryMock, times(1)).findById(1);
+            assertEquals("Despesas com mercado e restaurantes", response.description());
+            assertTrue(response.active());
         }
 
         @Test
-        @DisplayName("Deve criar uma categoria com sucesso")
-        void shouldCreateCategorySuccessfully() {
-            CategoryDTO.Create createDTO = new CategoryDTO.Create("Bebidas", "Sucos e refrigerantes", true);
+        @DisplayName("Deve listar todas as categorias com sucesso")
+        void shouldFindAllCategoriesSuccessfully() {
+            repository.create(CategoryBuilder.newCategory().build());
+            repository.create(CategoryBuilder.newCategory()
+                    .withName("Transporte")
+                    .withDescription("Despesas com mobilidade")
+                    .build());
 
-            Category savedCategory = CategoryBuilder.newCategory()
-                    .withId(10)
-                    .withName("Bebidas")
-                    .build();
+            List<CategoryDTO.Response> responses = service.findAll();
 
-            when(repositoryMock.findByName("Bebidas")).thenReturn(false);
-            when(repositoryMock.create(any(Category.class))).thenReturn(savedCategory);
+            assertNotNull(responses);
+            assertEquals(2, responses.size());
+            assertEquals("Alimentação", responses.get(0).name());
+            assertEquals("Despesas com mercado e restaurantes", responses.get(0).description());
+            assertTrue(responses.get(0).active());
+            assertEquals("Transporte", responses.get(1).name());
+            assertEquals("Despesas com mobilidade", responses.get(1).description());
+            assertTrue(responses.get(1).active());
+        }
 
-            CategoryDTO.Response response = service.create(createDTO);
+        @Test
+        @DisplayName("Deve atualizar a categoria com sucesso")
+        void shouldUpdateCategorySuccessfully() {
+            Category fakeCategory = CategoryBuilder.newCategory().build();
+            repository.create(fakeCategory);
+
+            CategoryDTO.Update updatedFakeCategory = CategoryBuilder.newCategory()
+                    .withId(fakeCategory.getId())
+                    .withName("Transporte")
+                    .withDescription("Despesas com mobilidade")
+                    .inactive()
+                    .buildDtoUpdate();
+
+            CategoryDTO.Response response = service.update(updatedFakeCategory);
 
             assertNotNull(response);
-            assertEquals(10, response.id());
-            assertEquals("Bebidas", response.name());
-            verify(repositoryMock, times(1)).create(any(Category.class));
+            assertEquals(1, response.id());
+            assertEquals("Transporte", response.name());
+            assertEquals("Despesas com mobilidade", response.description());
+            assertFalse(response.active());
         }
+
+        @Test
+        @DisplayName("Deve deletar a categoria com sucesso")
+        void shouldDeleteCategorySuccessfully() {
+            Category fakeCategory = CategoryBuilder.newCategory().build();
+            repository.create(fakeCategory);
+
+            CategoryDTO.Delete deletedFakeCategory = CategoryBuilder.newCategory()
+                    .withId(fakeCategory.getId())
+                    .buildDtoDelete();
+
+            CategoryDTO.Response response = service.delete(deletedFakeCategory);
+
+            assertNotNull(response);
+            assertEquals(1, response.id());
+            assertNotNull(response.deleteAt());
+            assertEquals("Alimentação", response.name());
+            assertEquals("Despesas com mercado e restaurantes", response.description());
+            assertTrue(response.active());
+        }
+
+
     }
 
     @Nested
@@ -72,33 +130,75 @@ class CategoryServiceTest {
     class SadPathTests {
 
         @Test
+        @DisplayName("Deve lançar exceção ao tentar criar categoria com nome já existente")
+        void shouldThrowExceptionWhenCreatingWithDuplicateName() {
+            Category fakeCategory = CategoryBuilder.newCategory().build();
+            repository.create(fakeCategory);
+
+            CategoryDTO.Create duplicateCategoryName = CategoryBuilder.newCategory().buildDtoCreate();
+
+            DuplicateResourceException exception = assertThrows(
+                    DuplicateResourceException.class,
+                    () -> service.create(duplicateCategoryName)
+            );
+
+            assertEquals("Já existe uma categoria cadastrada com o nome: Alimentação", exception.getMessage());
+        }
+
+        @Test
         @DisplayName("Deve lançar exceção ao buscar ID inexistente")
         void shouldThrowExceptionWhenIdNotFound() {
-            when(repositoryMock.findById(99)).thenReturn(Optional.empty());
 
             ResourceNotFoundException exception = assertThrows(
                     ResourceNotFoundException.class,
                     () -> service.findById(99)
             );
 
-            assertEquals("Categoria não encontrada com o id:99", exception.getMessage());
+            assertEquals("Categoria não encontrada com o id: 99", exception.getMessage());
         }
 
         @Test
-        @DisplayName("Deve lançar exceção ao tentar criar categoria com nome já existente")
-        void shouldThrowExceptionWhenCreatingWithDuplicateName() {
-            CategoryDTO.Create createDTO = new CategoryDTO.Create("Alimentação", "Desc", true);
+        @DisplayName("Deve lançar exceção ao tentar atualizar categoria com um id inexistente")
+        void shouldThrowExceptionWhenUpdatingWithIdNotFound() {
+            CategoryDTO.Update fakeCategory = CategoryBuilder.newCategory().withId(99).buildDtoUpdate();
 
-            // Simula que a busca por nome encontrou que JÁ EXISTE essa categoria no banco
-            when(repositoryMock.findByName("Alimentação")).thenReturn(true);
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> service.update(fakeCategory)
+            );
+
+            assertEquals("Categoria não encontrada com o id: 99", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Deve lançar exceção ao tentar atualizar categoria com nome já existente")
+        void shouldThrowExceptionWhenUpdatingWithDuplicateName() {
+            Category fakeCategory = CategoryBuilder.newCategory().build();
+            repository.create(fakeCategory);
+            Category fakeCategoryTwo = CategoryBuilder.newCategory().withName("Transporte").withDescription("Despesas com mobilidade").build();
+            repository.create(fakeCategoryTwo);
+
+            CategoryDTO.Update duplicateCategoryName = CategoryBuilder.newCategory().withId(fakeCategoryTwo.getId()).buildDtoUpdate();
 
             DuplicateResourceException exception = assertThrows(
                     DuplicateResourceException.class,
-                    () -> service.create(createDTO)
+                    () -> service.update(duplicateCategoryName)
             );
 
             assertEquals("Já existe uma categoria cadastrada com o nome: Alimentação", exception.getMessage());
-            verify(repositoryMock, never()).create(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar exceção ao tentar deletar categoria com um id inexistente")
+        void shouldThrowExceptionWhenDeletingWithIdNotFound() {
+            CategoryDTO.Delete fakeCategory = CategoryBuilder.newCategory().withId(99).buildDtoDelete();
+
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> service.delete(fakeCategory)
+            );
+
+            assertEquals("Categoria não encontrada com o id: 99", exception.getMessage());
         }
     }
 }
