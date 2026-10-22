@@ -71,10 +71,6 @@ public class CategoryService {
             exist.setActive(dto.active());
         }
 
-        if (dto.id() != null){
-            exist.setId(dto.id());
-        }
-
         Category updated = repository.update(exist);
         return convert(updated);
     }
