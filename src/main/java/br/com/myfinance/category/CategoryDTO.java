@@ -33,7 +33,7 @@ public final class CategoryDTO {
             boolean active,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt,
-            OffsetDateTime deleteAt
+            OffsetDateTime deletedAt
     ) {}
 
     public record Update(

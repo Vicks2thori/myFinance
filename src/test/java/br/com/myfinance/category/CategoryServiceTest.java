@@ -116,7 +116,7 @@ class CategoryServiceTest {
 
             assertNotNull(response);
             assertEquals(1, response.id());
-            assertNotNull(response.deleteAt());
+            assertNotNull(response.deletedAt());
             assertEquals("Alimentação", response.name());
             assertEquals("Despesas com mercado e restaurantes", response.description());
             assertTrue(response.active());
