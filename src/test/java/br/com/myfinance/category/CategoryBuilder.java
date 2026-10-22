@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 
 public class CategoryBuilder {
 
-    private Integer id = 1;
+    private Integer id = null;
     private String name = "Alimentação";
     private String description = "Despesas com mercado e restaurantes";
     private Boolean active = true;

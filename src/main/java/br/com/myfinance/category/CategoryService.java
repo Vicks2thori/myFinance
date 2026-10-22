@@ -35,7 +35,7 @@ public class CategoryService {
 
         Category category = repository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Categoria não encontrada com o id:" + id)
+                        new ResourceNotFoundException("Categoria não encontrada com o id: " + id)
                 );
 
         return convert(category);
@@ -52,7 +52,7 @@ public class CategoryService {
 
         Category exist = repository.findById(dto.id())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Categoria não encontrada com o id:" + dto.id())
+                        new ResourceNotFoundException("Categoria não encontrada com o id: " + dto.id())
                 );
 
         if (dto.name() != null) {
@@ -80,6 +80,11 @@ public class CategoryService {
     }
 
     public CategoryDTO.Response delete(CategoryDTO.Delete dto) {
+        repository.findById(dto.id())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categoria não encontrada com o id: " + dto.id())
+                );
+
         return convert(repository.softDelete(dto.id()));
     }
 

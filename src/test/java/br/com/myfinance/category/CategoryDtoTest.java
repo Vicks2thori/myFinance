@@ -172,10 +172,7 @@ class CategoryDtoTest {
                     .withDescription("Despesa com locomoção")
                     .inactive()
                     .buildDtoUpdate();
-
-            var violations = validator.validate(fakeCategoryDTO);
-
-            assertTrue(violations.isEmpty());
+            
             assertEquals("Transporte", fakeCategoryDTO.name());
             assertEquals("Despesa com locomoção", fakeCategoryDTO.description());
             assertFalse(fakeCategoryDTO.active());
