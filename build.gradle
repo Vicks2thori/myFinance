@@ -19,6 +19,7 @@ dependencies {
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
     implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
     implementation 'org.glassfish.expressly:expressly:5.0.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
 }
 
 test {

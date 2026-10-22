@@ -1,28 +1,36 @@
 package br.com.myfinance.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
 
-    private static final String URL =
-            System.getenv("DB_URL");
+    private static final HikariDataSource dataSource;
 
-    private static final String USER =
-            System.getenv("DB_USER");
+    static {
+        String url = System.getenv("DB_URL");
+        String user = System.getenv("DB_USER");
+        String password = System.getenv("DB_PASSWORD");
 
-    private static final String PASSW0RD =
-            System.getenv("DB_PASSWORD");
-
-    public static Connection USER() throws SQLException {
-
-        if (URL == null || USER == null || PASSW0RD == null) {
+        if (url == null || user == null || password == null) {
             throw new IllegalStateException(
                     "Configure DB_URL, DB_USER e DB_PASSWORD."
             );
         }
 
-        return DriverManager.getConnection(URL, USER, PASSW0RD);
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(user);
+        config.setPassword(password);
+        config.setMaximumPoolSize(10);
+
+        dataSource = new HikariDataSource(config);
+    }
+
+    public static Connection USER() throws SQLException {
+        return dataSource.getConnection();
     }
 }
